@@ -1,0 +1,10 @@
+{% extends 'basics.html' %}
+{% block title %}查询用户的票{% endblock %}
+{% block body %}
+    <form action="{{ url_for('userq') }}" method="post" style="width: 50%;">
+        <div class="form-group"><label for="select1">用户ID</label>
+           <input type="number" id="select1" placeholder="ID" name="userid"/>
+        </div>
+      <button type="submit" class="btn btn-primary mb-2">提交查询</button>
+    </form>
+{% endblock %}

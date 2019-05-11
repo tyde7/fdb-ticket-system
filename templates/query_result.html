@@ -1,0 +1,60 @@
+{% extends 'basics.html' %}
+{% block title %}条件查询{% endblock %}
+{% block body %}
+    <h2>查询结果</h2>
+{#    <div class="alert alert-success fade" role="alert" id="successAlert"><h4>订票成功!</h4></div>#}
+{#    <div class="alert alert-success" role="alert" id="successFail"><h4>订票失败!</h4></div>#}
+    <row><div class="col3">
+        用户ID:
+        <input type="number" id="userid" placeholder="ID"/>
+    </div></row>
+    <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">时间</th>
+                    <th scope="col">剩余人数</th>
+                    <th scope="col">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+    {% for i in items %}
+                <tr>
+                    <th scope="row">{{ "".join(i[0])+'演唱会' }}</th>
+                    <td>{{ i[1] }}</td>
+                    <td> <button type="button" class="btn btn-primary mb-2" onclick="createForm('{{ i[0][0] }}','{{ i[0][1] }}','{{ i[0][2] }}')">订票</button></td>
+                </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+    <script>
+    function createForm(name, city, month) {
+        let userid = document.getElementById("userid").value
+        if(!userid){
+            alert("未输入用户ID.")
+            return
+        }
+        fetch('/order',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                "Access-Control-Origin": "*"
+            },
+            referrer: 'no-referrer',
+            body: JSON.stringify({
+                name,
+                city,
+                month,
+                userid
+            })
+        }).then(function (response) {
+            if(response.status === 200){
+                alert("订票成功")
+            }else{
+                alert("订票失败!")
+            }
+        }).catch(()=>{
+            alert("网络错误!")
+        })
+    }
+    </script>
+{% endblock %}
