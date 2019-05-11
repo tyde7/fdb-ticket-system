@@ -16,7 +16,10 @@ def query():
     if request.method == 'POST':
         city = request.form.get('city')
         name = request.form.get('name')
-        items = get_all_concerts(db, (name, city))
+        if name != "所有":
+            items = get_all_concerts(db, (name, city))
+        else:
+            items = get_all_concerts(db, (name, ))
         return render_template('query_result.html', items=items)
 
 
