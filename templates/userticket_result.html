@@ -1,0 +1,8 @@
+{% extends 'basics.html' %}
+{% block title %}查询用户的票{% endblock %}
+{% block body %}
+    <row>用户{{ userid }}手里的票:</row>
+    <row>
+    有{% for t in tickets %}{{ "".join(t[1]) }}演唱会,{% endfor %}.
+    </row>
+{% endblock %}
