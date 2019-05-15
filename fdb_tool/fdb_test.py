@@ -1,7 +1,7 @@
 import itertools
 import traceback
 
-import fdb
+import fdb, time
 import fdb.tuple
 
 fdb.api_version(600)
@@ -23,6 +23,16 @@ attends = scheduling['attends']
 @fdb.transactional
 def add_class(tr, c):
     tr[course.pack(c)] = fdb.tuple.pack((100,))
+
+def exeTime(func):
+    def newFunc(*args, **args2):
+        t0 = time.time()
+        print("@%s, {%s} start" % (time.strftime("%X", time.localtime()), func.__name__))
+        back = func(*args, **args2)
+        print("@%s, {%s} end" % (time.strftime("%X", time.localtime()), func.__name__))
+        print("@%.3fs taken for {%s}" % (time.time() - t0, func.__name__))
+        return back
+    return newFunc
 
 
 # Generate 1,620620 classes like '9:00 chem for dummies'
@@ -156,8 +166,40 @@ def run(students, ops_per_student):
     for thr in threads: thr.join()
     print("Ran {} transactions".format(students * ops_per_student))
 
+@fdb.transactional
+
+def test_write(tr,times=10000):
+    test = fdb.directory.create_or_open(tr, ('test',))
+    test1 = test['data']
+    del tr[test.range(())]  # Clear the directory
+    from random import choice, randint
+    for i in range(times):
+        tr[course.pack(choice(class_names)+(randint(1,1000),))] = fdb.tuple.pack((100,))
+
+
+@fdb.transactional
+def test_read(tr,times=10000):
+    test = fdb.directory.create_or_open(tr, ('test',))
+    test1 = test['data']
+    from random import choice
+    for i in range(times):
+        pairs = tr[test1.range(choice(class_names)[:-1])]
+        _ = [test1.unpack(k) for k, v in pairs]
+
 
 if __name__ == "__main__":
     init(db)
     print("initialized")
     run(10, 100)
+
+def test():
+    t0 = time.time()
+    print("@%s, {%s} write start" % (time.strftime("%X", time.localtime()), test_write.__name__))
+    test_write(db)
+    print("@%s, {%s} end" % (time.strftime("%X", time.localtime()), test_write.__name__))
+    print("@%.3fs taken for {%s}" % (time.time() - t0, test_write.__name__))
+    t0 = time.time()
+    print("@%s, {%s} write start" % (time.strftime("%X", time.localtime()), test_read.__name__))
+    test_read(db)
+    print("@%s, {%s} end" % (time.strftime("%X", time.localtime()), test_read.__name__))
+    print("@%.3fs taken for {%s}" % (time.time() - t0, test_read.__name__))
